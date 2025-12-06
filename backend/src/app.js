@@ -11,8 +11,29 @@ import aiRoutes from "./routes/ai.routes.js"
 export const createApp = () => {
   const app = express()
 
-  // Core middleware
-  app.use(cors({ origin: process.env.FRONTEND_URL || "*", credentials: true }))
+  // Core middleware - Allow Vercel preview deployments and production URL
+  const frontendUrl = process.env.FRONTEND_URL || "*"
+  const allowedOrigins = frontendUrl.includes(",")
+    ? frontendUrl.split(",").map((url) => url.trim())
+    : [frontendUrl]
+  
+  app.use(
+    cors({
+      origin: (origin, callback) => {
+        // Allow requests with no origin
+        if (!origin) return callback(null, true)
+        
+        // Allow if matches any allowed origin or is a Vercel preview URL
+        const isAllowed =
+          allowedOrigins.includes("*") ||
+          allowedOrigins.some((url) => origin === url || origin.startsWith(url)) ||
+          origin.includes(".vercel.app")
+        
+        callback(null, isAllowed)
+      },
+      credentials: true,
+    })
+  )
   app.use(express.json({ limit: "10mb" }))
   app.use(express.urlencoded({ extended: true }))
   app.use(morgan("dev"))
