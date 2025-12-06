@@ -11,25 +11,31 @@ import aiRoutes from "./routes/ai.routes.js"
 export const createApp = () => {
   const app = express()
 
-  // Core middleware - Allow Vercel preview deployments and production URL
-  const frontendUrl = process.env.FRONTEND_URL || "*"
-  const allowedOrigins = frontendUrl.includes(",")
-    ? frontendUrl.split(",").map((url) => url.trim())
-    : [frontendUrl]
-  
+  // Core middleware - Allow all Vercel domains and configured FRONTEND_URL
   app.use(
     cors({
-      origin: (origin, callback) => {
+      origin: function (origin, callback) {
         // Allow requests with no origin
-        if (!origin) return callback(null, true)
+        if (!origin) {
+          return callback(null, true)
+        }
         
-        // Allow if matches any allowed origin or is a Vercel preview URL
-        const isAllowed =
-          allowedOrigins.includes("*") ||
-          allowedOrigins.some((url) => origin === url || origin.startsWith(url)) ||
-          origin.includes(".vercel.app")
+        // Always allow all Vercel domains (preview and production)
+        if (origin.includes(".vercel.app")) {
+          return callback(null, true)
+        }
         
-        callback(null, isAllowed)
+        // Allow if matches FRONTEND_URL
+        const frontendUrl = process.env.FRONTEND_URL
+        if (frontendUrl) {
+          const allowedUrls = frontendUrl.split(",").map((url) => url.trim().replace(/\/$/, ""))
+          if (allowedUrls.some((url) => origin === url || origin.startsWith(url))) {
+            return callback(null, true)
+          }
+        }
+        
+        // Default: allow all origins (for development)
+        callback(null, true)
       },
       credentials: true,
     })
