@@ -73,8 +73,16 @@ export default function SignupPage() {
         res.user.role === "candidate" ? "/dashboard/candidate" : "/dashboard/recruiter"
       window.location.href = target
     } catch (error: unknown) {
-      const message =
-        error instanceof Error ? error.message : "Failed to create account. Please try again."
+      let message = "Failed to create account. Please try again."
+      
+      if (error instanceof Error) {
+        message = error.message
+        // Check if it's a 409 conflict (email already exists)
+        if ((error as any).status === 409 || message.includes("already in use") || message.includes("409")) {
+          message = "This email is already registered. Please use a different email or try logging in instead."
+        }
+      }
+      
       toast({
         title: "Signup failed",
         description: message,

@@ -8,5 +8,8 @@ spacy
 numpy
 torch
 openai
+pymupdf
+python-docx
+docx2txt
 
 

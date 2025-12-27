@@ -24,7 +24,9 @@ async function request<T>(
     const message =
       (data && (data.message || data.error)) ||
       `Request failed with status ${res.status}`;
-    throw new Error(message);
+    const error = new Error(message);
+    (error as any).status = res.status;
+    throw error;
   }
 
   return data as T;
@@ -107,9 +109,82 @@ export interface CandidateMatch {
   };
 }
 
-export function apiGetCandidateMatches(token: string) {
-  return request<CandidateMatch[]>("/api/candidate/matches", {
+export interface PaginatedResponse<T> {
+  matches?: T[];
+  jobs?: T[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+  };
+}
+
+export function apiGetCandidateMatches(token: string, page = 1, limit = 20) {
+  return request<PaginatedResponse<CandidateMatch>>(`/api/candidate/matches?page=${page}&limit=${limit}`, {
     method: "GET",
+    token,
+  });
+}
+
+// Recruiter APIs
+
+export interface RecruiterMatch {
+  _id: string;
+  score: number;
+  topSkills: string[];
+  status: "suggested" | "shortlisted" | "contacted" | "rejected" | "hired";
+  candidateId: {
+    _id: string;
+    name: string;
+    email: string;
+    candidateProfile?: {
+      skills?: string[];
+      experienceYears?: number;
+    };
+  };
+  jobId: {
+    _id: string;
+    title: string;
+  };
+}
+
+export function apiGetRecruiterCandidates(jobId: string, token: string, page = 1, limit = 20) {
+  return request<PaginatedResponse<RecruiterMatch>>(`/api/recruiter/candidates/${jobId}?page=${page}&limit=${limit}`, {
+    method: "GET",
+    token,
+  });
+}
+
+export function apiGetRecruiterJobs(token: string, page = 1, limit = 20) {
+  return request<PaginatedResponse<{ _id: string; title: string; description: string; location?: string; createdAt: string }>>(`/api/recruiter/jobs?page=${page}&limit=${limit}`, {
+    method: "GET",
+    token,
+  });
+}
+
+export function apiShortlistCandidate(matchId: string, token: string) {
+  return request<{ message: string; match: RecruiterMatch }>(`/api/recruiter/shortlist/${matchId}`, {
+    method: "PUT",
+    token,
+  });
+}
+
+export function apiRejectCandidate(matchId: string, token: string) {
+  return request<{ message: string; match: RecruiterMatch }>(`/api/recruiter/reject/${matchId}`, {
+    method: "PUT",
+    token,
+  });
+}
+
+export function apiUpdateMatchStatus(
+  matchId: string,
+  status: "suggested" | "shortlisted" | "contacted" | "rejected" | "hired",
+  token: string
+) {
+  return request<{ message: string; match: RecruiterMatch }>(`/api/recruiter/match/${matchId}/status`, {
+    method: "PUT",
+    body: { status },
     token,
   });
 }

@@ -5,6 +5,7 @@ import { authRequired } from "../middleware/auth.js"
 import { User } from "../models/User.js"
 import { Job } from "../models/Job.js"
 import { Match } from "../models/Match.js"
+import { matchCandidateToJobsAsync } from "../services/matching.service.js"
 
 const router = express.Router()
 const upload = multer({ storage: multer.memoryStorage() })
@@ -53,6 +54,9 @@ router.post(
       req.user.candidateProfile.embedding = embedding
       await req.user.save()
 
+      // Trigger async matching with all existing jobs
+      matchCandidateToJobsAsync(req.user._id)
+
       res.json({ message: "Resume processed", skills, experienceYears })
     } catch (err) {
       console.error("Resume upload error:", err)
@@ -64,12 +68,28 @@ router.post(
 // GET /api/candidate/matches
 router.get("/matches", authRequired("candidate"), async (req, res) => {
   try {
-    const matches = await Match.find({ candidateId: req.user._id })
-      .sort({ score: -1 })
-      .limit(50)
-      .populate("jobId")
+    const page = parseInt(req.query.page) || 1
+    const limit = parseInt(req.query.limit) || 20
+    const skip = (page - 1) * limit
 
-    res.json(matches)
+    const [matches, total] = await Promise.all([
+      Match.find({ candidateId: req.user._id })
+        .sort({ score: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate("jobId"),
+      Match.countDocuments({ candidateId: req.user._id }),
+    ])
+
+    res.json({
+      matches,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit),
+      },
+    })
   } catch (err) {
     console.error("Get matches error:", err)
     res.status(500).json({ message: "Failed to fetch matches" })

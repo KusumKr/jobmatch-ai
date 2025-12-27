@@ -22,6 +22,21 @@ router.post("/resume/analyze", authRequired(["candidate", "recruiter"]), async (
   }
 })
 
+// POST /api/resume/compare - Compare resume with job description
+router.post("/resume/compare", authRequired(["candidate", "recruiter"]), async (req, res) => {
+  try {
+    const { resumeText, jobDescription } = req.body
+    if (!resumeText || !jobDescription) {
+      return res.status(400).json({ message: "resumeText and jobDescription are required" })
+    }
+    const response = await ai.post("/resume/compare", { resumeText, jobDescription })
+    res.json(response.data)
+  } catch (err) {
+    console.error("AI resume compare error:", err)
+    res.status(500).json({ message: "Failed to compare resume" })
+  }
+})
+
 // POST /api/salary/predict
 router.post("/salary/predict", authRequired(["candidate", "recruiter"]), async (req, res) => {
   try {

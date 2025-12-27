@@ -34,7 +34,7 @@ export default function CandidateDashboard() {
         setLoading(true)
         const data = await apiGetCandidateMatches(token)
         if (!cancelled) {
-          setMatches(data)
+          setMatches(data.matches || [])
         }
       } catch (err) {
         if (!cancelled) {

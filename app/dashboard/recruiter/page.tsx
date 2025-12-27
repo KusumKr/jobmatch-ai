@@ -1,44 +1,14 @@
 "use client"
 
-import { Users, Briefcase, MessageSquare, TrendingUp } from "lucide-react"
+import { Users, Briefcase, MessageSquare, TrendingUp, ArrowRight } from "lucide-react"
+import Link from "next/link"
 import { TopNav } from "@/components/dashboard/top-nav"
-import { CandidateCard } from "@/components/dashboard/candidate-card"
 
 const stats = [
   { label: "Active Job Postings", value: "8", icon: Briefcase, color: "from-primary to-primary/50" },
   { label: "Matched Candidates", value: "124", icon: Users, color: "from-secondary to-secondary/50" },
   { label: "Pending Applications", value: "23", icon: MessageSquare, color: "from-accent to-accent/50" },
   { label: "Hired This Month", value: "4", icon: TrendingUp, color: "from-primary to-accent" },
-]
-
-const mockCandidates = [
-  {
-    id: 1,
-    name: "Sarah Chen",
-    title: "Senior React Developer",
-    matchPercent: 98,
-    skills: ["React", "TypeScript", "Node.js"],
-    jobTitle: "Senior React Developer",
-    image: "SC",
-  },
-  {
-    id: 2,
-    name: "Marcus Johnson",
-    title: "Full Stack Engineer",
-    matchPercent: 95,
-    skills: ["React", "Python", "AWS"],
-    jobTitle: "Full Stack Engineer",
-    image: "MJ",
-  },
-  {
-    id: 3,
-    name: "Emily Rodriguez",
-    title: "Frontend Engineer",
-    matchPercent: 92,
-    skills: ["Vue.js", "TypeScript", "CSS"],
-    jobTitle: "Senior React Developer",
-    image: "ER",
-  },
 ]
 
 export default function RecruiterDashboard() {
@@ -83,13 +53,27 @@ export default function RecruiterDashboard() {
 
           {/* Top Matched Candidates */}
           <div className="lg:col-span-2">
-            <div>
-              <h2 className="text-2xl font-bold text-foreground mb-4">Top Candidate Matches</h2>
-              <div className="space-y-4">
-                {mockCandidates.map((candidate) => (
-                  <CandidateCard key={candidate.id} candidate={candidate} />
-                ))}
+            <div className="rounded-xl border border-border bg-card/50 backdrop-blur-sm p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-2xl font-bold text-foreground">Top Candidate Matches</h2>
+                <Link
+                  href="/dashboard/recruiter/matches"
+                  className="text-sm font-medium text-primary hover:underline flex items-center gap-1"
+                >
+                  View All
+                  <ArrowRight size={16} />
+                </Link>
               </div>
+              <p className="text-muted-foreground mb-4">
+                View and manage AI-matched candidates for your job postings
+              </p>
+              <Link
+                href="/dashboard/recruiter/matches"
+                className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 font-semibold text-primary-foreground hover:bg-primary/90 transition"
+              >
+                <Users size={18} />
+                View Candidate Matches
+              </Link>
             </div>
           </div>
         </div>
