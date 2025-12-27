@@ -21,6 +21,15 @@ if (result.error) {
   }
 }
 
+// Validate critical environment variables
+if (!process.env.JWT_SECRET) {
+  console.error("❌ JWT_SECRET is missing! This will cause authentication to fail.")
+  console.error("Please set JWT_SECRET in your Render environment variables.")
+  process.exit(1)
+} else {
+  console.log("✓ JWT_SECRET is set")
+}
+
 import { createApp } from "./app.js"
 import { connectDb } from "./config/db.js"
 

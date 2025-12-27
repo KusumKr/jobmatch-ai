@@ -30,7 +30,13 @@ router.post(
     const passwordHash = await bcrypt.hash(password, 10)
     const user = await User.create({ name, email, passwordHash, role })
 
-    const token = jwt.sign({ sub: user._id, role: user.role }, process.env.JWT_SECRET, {
+    const jwtSecret = process.env.JWT_SECRET
+    if (!jwtSecret) {
+      console.error("JWT_SECRET is not set!")
+      return res.status(500).json({ message: "Server configuration error" })
+    }
+
+    const token = jwt.sign({ sub: user._id, role: user.role }, jwtSecret, {
       expiresIn: "7d",
     })
 
@@ -61,7 +67,13 @@ router.post(
       return res.status(401).json({ message: "Invalid credentials" })
     }
 
-    const token = jwt.sign({ sub: user._id, role: user.role }, process.env.JWT_SECRET, {
+    const jwtSecret = process.env.JWT_SECRET
+    if (!jwtSecret) {
+      console.error("JWT_SECRET is not set!")
+      return res.status(500).json({ message: "Server configuration error" })
+    }
+
+    const token = jwt.sign({ sub: user._id, role: user.role }, jwtSecret, {
       expiresIn: "7d",
     })
 

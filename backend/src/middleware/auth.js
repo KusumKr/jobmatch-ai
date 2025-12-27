@@ -13,7 +13,12 @@ export const authRequired = (roles = []) => {
         return res.status(401).json({ message: "Authentication required" })
       }
 
-      const payload = jwt.verify(token, process.env.JWT_SECRET)
+      const jwtSecret = process.env.JWT_SECRET
+      if (!jwtSecret) {
+        console.error("JWT_SECRET is not set in middleware!")
+        return res.status(500).json({ message: "Server configuration error" })
+      }
+      const payload = jwt.verify(token, jwtSecret)
       const user = await User.findById(payload.sub)
 
       if (!user) {
