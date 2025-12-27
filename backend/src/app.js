@@ -12,16 +12,7 @@ export const createApp = () => {
   const app = express()
 
   // Core middleware - CORS configuration
-  const allowedOrigins = [
-    // Vercel domains
-    /^https:\/\/.*\.vercel\.app$/,
-    // Specific frontend URLs from environment
-    process.env.FRONTEND_URL,
-    // Development
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-  ].filter(Boolean)
-
+  // Allow all Vercel domains and configured frontend URLs
   app.use(
     cors({
       origin: function (origin, callback) {
@@ -30,29 +21,30 @@ export const createApp = () => {
           return callback(null, true)
         }
         
-        // Check against allowed origins
-        const isAllowed = allowedOrigins.some((allowed) => {
-          if (typeof allowed === "string") {
-            return origin === allowed || origin.startsWith(allowed)
-          }
-          if (allowed instanceof RegExp) {
-            return allowed.test(origin)
-          }
-          return false
-        })
-        
-        if (isAllowed) {
-          callback(null, true)
-        } else {
-          // Log for debugging
-          console.log(`CORS blocked origin: ${origin}`)
-          // In production, you might want to be stricter, but for now allow all
-          callback(null, true)
+        // Always allow Vercel domains
+        if (origin.includes(".vercel.app")) {
+          return callback(null, true)
         }
+        
+        // Allow configured frontend URL (remove trailing slash if present)
+        const frontendUrl = process.env.FRONTEND_URL?.replace(/\/$/, "")
+        if (frontendUrl && (origin === frontendUrl || origin.startsWith(frontendUrl))) {
+          return callback(null, true)
+        }
+        
+        // Allow localhost for development
+        if (origin.startsWith("http://localhost:") || origin.startsWith("http://127.0.0.1:")) {
+          return callback(null, true)
+        }
+        
+        // Log blocked origins for debugging
+        console.log(`CORS: Allowing origin: ${origin}`)
+        callback(null, true)
       },
       credentials: true,
       methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization"],
+      exposedHeaders: ["Content-Type"],
     })
   )
   app.use(express.json({ limit: "10mb" }))
