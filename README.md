@@ -4,11 +4,7 @@
 
 **Intelligent job matching powered by AI, NLP, and machine learning**
 
-[Features](#-features) • [Tech Stack](#-tech-stack) • [Quick Start](#-quick-start) • [API Reference](#-api-reference)
-
 </div>
-
----
 
 ## 📋 Overview
 
@@ -254,19 +250,6 @@ See [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) for more.
 - [NEXT_STEPS.md](./NEXT_STEPS.md) - Development roadmap
 - [backend/DEPLOY.md](./backend/DEPLOY.md) - Deployment guide
 - [backend/ai-service/README.md](./backend/ai-service/README.md) - AI service docs
-
----
-
-## 🎯 Roadmap
-
-### Completed ✅
-- Authentication, Resume parsing, AI matching, Salary prediction, Shortlisting
-
-### Planned 📋
-- Enhanced Resume Analyzer UI
-- Job search & filtering
-- File storage (S3)
-- Messaging system
 
 ---
 
